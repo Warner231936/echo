@@ -18,6 +18,20 @@ bash setup.sh
 
 > **Note:** These scripts attempt to install optional components and may require adjustments for your specific environment.
 
+## LLMs
+
+Model clients live in the `llm/` directory. By default Requiem falls back to
+an echo model, but it can use providers such as Mistral when configured. To
+enable Mistral install the `mistralai` package and provide an API key via the
+`MISTRAL_API_KEY` environment variable:
+
+```bash
+export MISTRAL_API_KEY="your-key"
+pip install mistralai
+```
+
+Without a key the assistant uses the echo model.
+
 ## Usage
 
 Launch a simple chat loop:

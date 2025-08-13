@@ -2,7 +2,7 @@ import time
 import json
 import threading
 import subprocess
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Dict, Any
 
 try:
@@ -72,13 +72,50 @@ class Requiem:
 
     # --------------- public API ----------------
     def receive_input(self, text: str) -> str:
+        """Process user input and generate a simple response."""
         self._store(MemoryItem(time.time(), {"user": text}))
+
         if not self.policy.allowed(text):
             reply = "This request conflicts with my policies."
+
+        elif text.lower().startswith("remember "):
+            # allow the user to explicitly store memories
+            memory = text[len("remember ") :].strip()
+            self._store(MemoryItem(time.time(), {"note": memory}))
+            reply = "I'll remember that."
+
+        elif "what do you remember" in text.lower():
+            notes = [item.data["note"] for item in self.ltm + self.stm if "note" in item.data]
+            reply = "I recall: " + "; ".join(notes[-3:]) if notes else "I don't have any memories yet."
+
+        elif "time" in text.lower():
+            reply = f"It's {time.ctime()}"
+
         else:
-            reply = f"Echo: {text}"
+            # reference the previous user message if available
+            last_user = next(
+                (item.data["user"] for item in reversed(self.stm[:-1]) if "user" in item.data),
+                None,
+            )
+            if last_user:
+                reply = f"Previously you said '{last_user}'. Echo: {text}"
+            else:
+                reply = f"Echo: {text}"
+
         self._store(MemoryItem(time.time(), {"assistant": reply}))
         return reply
+
+    def chat(self) -> None:
+        """Interactive chat loop for the command line."""
+        print("Requiem ready. Type 'exit' to quit.")
+        while True:
+            try:
+                text = input("you> ")
+            except (EOFError, KeyboardInterrupt):
+                break
+            if text.strip().lower() == "exit":
+                break
+            print("rq>", self.receive_input(text))
 
     def run_command(self, cmd: str) -> str:
         """Execute a shell command and return its output."""
@@ -95,13 +132,4 @@ class Requiem:
 
 
 if __name__ == "__main__":
-    rq = Requiem()
-    print("Requiem ready. Type 'exit' to quit.")
-    while True:
-        try:
-            text = input("you> ")
-        except (EOFError, KeyboardInterrupt):
-            break
-        if text.strip().lower() == "exit":
-            break
-        print("rq>", rq.receive_input(text))
+    Requiem().chat()

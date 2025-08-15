@@ -1,0 +1,152 @@
+import os
+import sqlite3
+from flask import Flask, request, jsonify, session, redirect, url_for, render_template_string
+from werkzeug.security import generate_password_hash, check_password_hash
+
+from requiem import Requiem
+
+app = Flask(__name__)
+app.secret_key = "changeme"  # pragma: no cover - development key
+
+DB_PATH = os.path.join(os.path.dirname(__file__), "database", "users.db")
+
+
+def init_db() -> None:
+    os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password TEXT)")
+    cur.execute("SELECT COUNT(*) FROM users")
+    if cur.fetchone()[0] == 0:
+        cur.execute(
+            "INSERT INTO users (username, password) VALUES (?, ?)",
+            ("admin", generate_password_hash("password")),
+        )
+    conn.commit()
+    conn.close()
+
+
+def validate_user(username: str, password: str) -> bool:
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+    cur.execute("SELECT password FROM users WHERE username=?", (username,))
+    row = cur.fetchone()
+    conn.close()
+    return bool(row and check_password_hash(row[0], password))
+
+
+init_db()
+
+# Single Requiem instance for the web session
+rq = Requiem()
+
+INDEX_HTML = """
+<!doctype html>
+<html>
+<head>
+  <title>Requiem Chat</title>
+  <style>
+    #layout { display: flex; }
+    #chat { flex: 2; border:1px solid #ccc; height:300px; overflow:auto; margin-right:1em; }
+    #side { flex:1; display:flex; flex-direction:column; }
+    #thoughts, #actions, #status { border:1px solid #ccc; flex:1; overflow:auto; margin-bottom:1em; }
+    #status { font-family: monospace; }
+  </style>
+</head>
+<body>
+  <h1>Requiem</h1>
+    <div id="layout">
+      <div id="chat"></div>
+      <div id="side">
+        <div id="thoughts"></div>
+        <div id="actions"></div>
+        <div id="status"></div>
+      </div>
+    </div>
+  <input id="msg" placeholder="Say something..." />
+  <button onclick="send()">Send</button>
+<script>
+async function send() {
+  const msg = document.getElementById('msg').value;
+  document.getElementById('msg').value = '';
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: msg })
+  });
+  const data = await res.json();
+  const log = document.getElementById('chat');
+  log.innerHTML += `<div><strong>You:</strong> ${msg}</div>`;
+  log.innerHTML += `<div><strong>Requiem:</strong> ${data.reply}</div>`;
+  log.scrollTop = log.scrollHeight;
+}
+
+async function poll() {
+  const res = await fetch('/api/state');
+  const data = await res.json();
+  document.getElementById('thoughts').innerHTML = data.thoughts.map(t => `<div>${t}</div>`).join('');
+  document.getElementById('actions').innerHTML = data.actions.map(a => `<div>${a}</div>`).join('');
+  const status = data.status || {};
+  document.getElementById('status').innerHTML = Object.entries(status).map(([k,v]) => `<div>${k}: ${v}</div>`).join('');
+}
+setInterval(poll, 1000);
+</script>
+</body>
+</html>
+"""
+
+LOGIN_HTML = """
+<form method="post">
+  <input name="username" placeholder="username" />
+  <input type="password" name="password" placeholder="password" />
+  <button type="submit">Login</button>
+</form>
+"""
+
+@app.route('/')
+def index():
+    if 'user' not in session:
+        return redirect(url_for('login'))
+    return INDEX_HTML
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        user = request.form.get('username', '')
+        pw = request.form.get('password', '')
+        if validate_user(user, pw):
+            session['user'] = user
+            return redirect(url_for('index'))
+    return render_template_string(LOGIN_HTML)
+
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('login'))
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    if 'user' not in session:
+        return jsonify({'error': 'unauthorized'}), 401
+    data = request.get_json(force=True)
+    text = data.get('message', '')
+    reply = rq.receive_input(text)
+    return jsonify({'reply': reply})
+
+@app.route('/api/state')
+def state():
+    if 'user' not in session:
+        return jsonify({'error': 'unauthorized'}), 401
+    return jsonify({
+        'thoughts': rq.get_thoughts(),
+        'actions': rq.get_actions(),
+        'status': rq.get_status(),
+    })
+
+def run(host: str = '127.0.0.1', port: int = 5000) -> None:
+    app.run(host=host, port=port)
+
+if __name__ == '__main__':
+    run()

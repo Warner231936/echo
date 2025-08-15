@@ -9,3 +9,7 @@ class BaseLLM(ABC):
     def reply(self, text: str, last_user: Optional[str]) -> str:
         """Return a reply from the model."""
         raise NotImplementedError
+
+    def alter(self, instructions: str) -> str:
+        """Placeholder hook for self-modifying behavior."""
+        return "model alteration not supported"

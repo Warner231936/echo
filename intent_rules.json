@@ -1,0 +1,11 @@
+{
+  "remember ": "remember",
+  "recall ": "recall",
+  "what do you remember": "recall_all",
+  "ask strelitzia ": "ask_friend",
+  "run code ": "run_code",
+  "talk to yourself": "self_talk",
+  "self talk": "self_talk",
+  "search web ": "web_search",
+  "wiki ": "web_search"
+}

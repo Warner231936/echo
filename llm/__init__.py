@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import Optional, List
 
 from .base import BaseLLM
 
@@ -15,22 +15,46 @@ class EchoLLM(BaseLLM):
         return f"echo model noted: {instructions}"
 
 
+def _candidate_models(preferred: Optional[str]) -> List[str]:
+    """Return a list of models to try in order of preference."""
+    candidates = []
+    if preferred:
+        candidates.append(preferred)
+    env_model = os.environ.get("LLM_MODEL")
+    if env_model:
+        candidates.append(env_model)
+    # include common small models as fallbacks
+    candidates.extend(["distilgpt2", "sshleifer/tiny-gpt2"])
+    seen = set()
+    return [m for m in candidates if not (m in seen or seen.add(m))]
+
+
 def load_llm(model: str = "distilgpt2") -> BaseLLM:
-    """Return an available language model client or a small Hugging Face model."""
+    """Return an available language model client, always ensuring speech capability."""
+
     api_key = os.environ.get("MISTRAL_API_KEY")
-    if api_key and model.startswith("mistral"):
+    models = _candidate_models(model)
+
+    if api_key:
         try:
             from .mistral import MistralLLM
-            return MistralLLM(api_key, model)
-        except Exception:  # pragma: no cover - network/import issues
+            for name in models:
+                if name.startswith("mistral"):
+                    try:
+                        return MistralLLM(api_key, name)
+                    except Exception:  # pragma: no cover - network/import issues
+                        continue
+        except Exception:  # pragma: no cover - import issues
             pass
-    # Try a local Hugging Face model before falling back to echo
+
     try:
         from .hf import HuggingFaceLLM
-        return HuggingFaceLLM(model)
+        for name in models:
+            try:
+                return HuggingFaceLLM(name)
+            except Exception:
+                continue
     except Exception:
-        try:
-            from .hf import HuggingFaceLLM
-            return HuggingFaceLLM("distilgpt2")
-        except Exception:
-            return EchoLLM()
+        pass
+
+    return EchoLLM()

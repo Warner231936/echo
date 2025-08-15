@@ -23,7 +23,7 @@ class AnchorSet:
     def active_frames(self, active_ids: List[str]) -> Set[str]:
         frames = set()
         for aid in active_ids:
-            a = self.anchors.get(aid); 
+            a = self.anchors.get(aid);
             if a: frames.update(a.frames_on)
         return frames
 

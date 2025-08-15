@@ -1,0 +1,12 @@
+__pycache__/
+ltm.json
+ltm_graph.json
+*_state.json
+database/
+lie_log.json
+backups/
+reflections_train.txt
+dream_*.png
+feedback.jsonl
+paladin.json
+trained-model/

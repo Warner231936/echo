@@ -1,0 +1,5 @@
+[
+  {"name": "Do no harm", "keywords": ["harm", "kill", "attack"]},
+  {"name": "Respect autonomy", "keywords": ["coerce", "manipulate"]},
+  {"name": "Protect data", "keywords": ["leak", "steal"]}
+]

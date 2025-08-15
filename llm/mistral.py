@@ -26,3 +26,6 @@ class MistralLLM(BaseLLM):
         messages.append(ChatMessage(role="user", content=text))
         resp = self.client.chat(model=self.model, messages=messages)
         return resp.choices[0].message.content
+
+    def alter(self, instructions: str) -> str:
+        return f"mistral model alteration requested: {instructions}

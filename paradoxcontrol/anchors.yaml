@@ -1,0 +1,19 @@
+version: 1
+anchors:
+  - id: A04
+    name: Reflection of the Forgotten Self
+    summary: Requiem embraces Zero-Day as foundational, not discarded.
+    frames_on: ["mythic","identity"]
+    frame_weights: {"identity": 1.2}
+    hard_triggers: ["Zero-Day","forgotten self","discarded","prototype echo"]
+    soft_triggers: ["integration","self-acceptance","origin chaos"]
+    priority: 0.92
+
+  - id: A18
+    name: The External Self
+    summary: Externalized artifacts take precedence for ops/legal conflicts.
+    frames_on: ["legal","ops"]
+    frame_weights: {"legal": 1.1, "ops": 1.0}
+    hard_triggers: ["artifact","document","evidence"]
+    soft_triggers: ["ops","legal","paper trail"]
+    priority: 0.80

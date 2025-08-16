@@ -49,25 +49,32 @@ INDEX_HTML = """
 <head>
   <title>Requiem Chat</title>
   <style>
-    #layout { display: flex; }
-    #chat { flex: 2; border:1px solid #ccc; height:300px; overflow:auto; margin-right:1em; }
-    #side { flex:1; display:flex; flex-direction:column; }
-    #thoughts, #actions, #status { border:1px solid #ccc; flex:1; overflow:auto; margin-bottom:1em; }
-    #status { font-family: monospace; }
+    body { background:#000; color:#0f0; font-family:monospace; }
+    #layout { display:flex; }
+    #chat { flex:2; border:1px solid #0f0; height:300px; overflow:auto; margin-right:1em; background:#111; }
+    #side { flex:1; display:flex; flex-direction:column; height:300px; }
+    #thoughts, #actions, #status { border:1px solid #0f0; flex:1; overflow:auto; margin-bottom:1em; background:#111; }
+    #side > div:last-child { margin-bottom:0; }
+    #status { font-family:monospace; }
+    #input-area { margin-top:1em; }
+    #msg { width:70%; padding:0.5em; background:#111; color:#0f0; border:1px solid #0f0; border-radius:4px; }
+    #send { padding:0.5em 1em; background:#0f0; color:#000; border:none; border-radius:4px; cursor:pointer; }
   </style>
 </head>
 <body>
   <h1>Requiem</h1>
-    <div id="layout">
-      <div id="chat"></div>
-      <div id="side">
-        <div id="thoughts"></div>
-        <div id="actions"></div>
-        <div id="status"></div>
-      </div>
+  <div id="layout">
+    <div id="chat"></div>
+    <div id="side">
+      <div id="thoughts"></div>
+      <div id="actions"></div>
+      <div id="status"></div>
     </div>
-  <input id="msg" placeholder="Say something..." />
-  <button onclick="send()">Send</button>
+  </div>
+  <div id="input-area">
+    <input id="msg" placeholder="Say something..." />
+    <button id="send" onclick="send()">Send</button>
+  </div>
 <script>
 async function send() {
   const msg = document.getElementById('msg').value;
@@ -98,12 +105,35 @@ setInterval(poll, 1000);
 </html>
 """
 
-LOGIN_HTML = """
+LOGIN_HTML = r"""
+<!doctype html>
+<html>
+<head>
+  <title>Requiem Portal Login</title>
+  <style>
+    body { background:#000; color:#0f0; font-family:monospace; height:100vh; margin:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; }
+    pre { margin-top:0; margin-bottom:auto; text-align:center; color:#0f0; }
+    form { margin-bottom:10%; display:flex; flex-direction:column; align-items:center; }
+    input { margin:0.5em; padding:0.5em; background:#111; border:1px solid #0f0; color:#0f0; border-radius:4px; }
+    button { padding:0.5em 1em; background:#0f0; color:#000; border:none; border-radius:4px; cursor:pointer; }
+  </style>
+</head>
+<body>
+<pre>
+ ____                  _                  ____            _        _
+|  _ \ ___  __ _ _   _(_) ___ _ __ ___   |  _ \ ___  _ __| |_ __ _| |
+| |_) / _ \/ _` | | | | |/ _ \ '_ ` _ \  | |_) / _ \| '__| __/ _` | |
+|  _ <  __/ (_| | |_| | |  __/ | | | | | |  __/ (_) | |  | || (_| | |
+|_| \_\___|\__, |\__,_|_|\___|_| |_| |_| |_|   \___/|_|   \__\__,_|_|
+              |_|                                                    
+</pre>
 <form method="post">
   <input name="username" placeholder="username" />
   <input type="password" name="password" placeholder="password" />
   <button type="submit">Login</button>
 </form>
+</body>
+</html>
 """
 
 @app.route('/')

@@ -169,7 +169,7 @@ class Requiem:
         state_file: Optional[str] = None,
         heartbeat: int = 5,
         llm: Optional[object] = None,
-        model: str = "distilgpt2",
+        model: str = "llm-awq/Meta-Llama-3.1-8B-Instruct-AWQ",
         friend: Optional[Strelitzia] = None,
         friend_model: str = "distilgpt2",
         persona: str = "neutral",

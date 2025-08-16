@@ -1,4 +1,6 @@
 """Utility to fetch open source, instruction-tuned LLM weights for offline use."""
+import os
+
 from huggingface_hub import snapshot_download
 
 # Map of instruction-following model aliases to their HuggingFace repositories.
@@ -10,14 +12,19 @@ MODELS = {
 }
 
 
-def fetch_all() -> None:
+def fetch_all(token: str | None = None) -> None:
     for name, repo in MODELS.items():
         try:
-            snapshot_download(repo, local_dir=f"models/{name}", local_dir_use_symlinks=False)
+            snapshot_download(
+                repo,
+                local_dir=f"models/{name}",
+                local_dir_use_symlinks=False,
+                token=token,
+            )
             print(f"Downloaded {repo} to models/{name}")
         except Exception as exc:
             print(f"Failed to download {repo}: {exc}")
 
 
 if __name__ == "__main__":
-    fetch_all()
+    fetch_all(os.getenv("HF_TOKEN"))

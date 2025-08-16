@@ -49,16 +49,63 @@ INDEX_HTML = """
 <head>
   <title>Requiem Chat</title>
   <style>
-    body { background:#000; color:#0f0; font-family:monospace; }
-    #layout { display:flex; }
-    #chat { flex:2; border:1px solid #0f0; height:300px; overflow:auto; margin-right:1em; background:#111; }
-    #side { flex:1; display:flex; flex-direction:column; height:300px; }
-    #thoughts, #actions, #status { border:1px solid #0f0; flex:1; overflow:auto; margin-bottom:1em; background:#111; }
-    #side > div:last-child { margin-bottom:0; }
-    #status { font-family:monospace; }
-    #input-area { margin-top:1em; }
-    #msg { width:70%; padding:0.5em; background:#111; color:#0f0; border:1px solid #0f0; border-radius:4px; }
-    #send { padding:0.5em 1em; background:#0f0; color:#000; border:none; border-radius:4px; cursor:pointer; }
+    body {
+      margin:0;
+      padding:20px;
+      background:#1e1e1e;
+      color:#fff;
+      font-family:Arial, sans-serif;
+    }
+    #layout {
+      display:flex;
+      gap:20px;
+    }
+    #chat {
+      width:600px;
+      height:400px;
+      border:1px solid #444;
+      border-radius:6px;
+      background:#2e2e2e;
+      padding:10px;
+      overflow:auto;
+      box-sizing:border-box;
+    }
+    #side {
+      width:300px;
+      height:400px;
+      display:flex;
+      flex-direction:column;
+      gap:20px;
+    }
+    #thoughts, #actions, #status {
+      height:120px;
+      border:1px solid #444;
+      border-radius:6px;
+      background:#2e2e2e;
+      padding:10px;
+      overflow:auto;
+      box-sizing:border-box;
+    }
+    #input-area {
+      margin-top:20px;
+    }
+    #msg {
+      width:500px;
+      padding:10px;
+      background:#2e2e2e;
+      color:#fff;
+      border:1px solid #444;
+      border-radius:4px;
+    }
+    #send {
+      padding:10px 20px;
+      margin-left:10px;
+      background:#007bff;
+      color:#fff;
+      border:none;
+      border-radius:4px;
+      cursor:pointer;
+    }
   </style>
 </head>
 <body>

@@ -121,6 +121,27 @@ and warns if resources appear limited.
 
 If transformers are unavailable it falls back to a simple echo model.
 
+## Discord Bridge
+
+Requiem can relay messages to a Discord server through a small bridge
+implemented in `discord_bot.py`. First start the web service so the bot can
+access the `POST /api/discord` endpoint:
+
+```
+python web.py
+```
+
+Then run the bot with your Discord token:
+
+```
+export DISCORD_TOKEN="your-bot-token"
+python discord_bot.py
+```
+
+Optional environment variables `REQUIEM_URL` and `DISCORD_API_TOKEN` control the
+web endpoint and shared secret used for authorization. Incoming Discord messages
+are forwarded to Requiem and the bot posts the reply back to the channel.
+
 ## Usage
 
 Launch a chat loop with a multi-pane console UI:

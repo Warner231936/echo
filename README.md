@@ -64,6 +64,9 @@ A basic `setup.sh` script is available for Ubuntu-based systems:
 bash setup.sh
 ```
 
+These setup scripts install the `portalocker` dependency used for safe single-writer
+long-term memory updates.
+
 ## New Modules
 
 - **Self Model** – `self_model.py` maintains core beliefs and records code fingerprints so Requiem can reason about its own implementation.

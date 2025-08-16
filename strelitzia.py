@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import List, Dict, Any, Optional
 
 from llm import load_llm
+from ltm_store import read_ltm, write_ltm
 
 
 @dataclass
@@ -42,28 +43,22 @@ class Strelitzia:
     def _store(self, item: MemoryItem) -> None:
         self.stm.append(item)
         self.ltm.append(item)
-        with open(self.ltm_file, "w", encoding="utf-8") as f:
-            json.dump([i.__dict__ for i in self.ltm], f)
+        write_ltm([i.__dict__ for i in self.ltm], self.ltm_file)
 
     def _load_ltm(self) -> List[MemoryItem]:
+        data = read_ltm(self.ltm_file, default=[])
         try:
-            with open(self.ltm_file, "r", encoding="utf-8") as f:
-                data = json.load(f)
             return [MemoryItem(**d) for d in data]
-        except FileNotFoundError:
+        except Exception:
+            write_ltm([], self.ltm_file)
             return []
 
     def _save_state(self) -> None:
-        with open(self.state_file, "w", encoding="utf-8") as f:
-            json.dump({"thoughts": self.thought_log}, f)
+        write_ltm({"thoughts": self.thought_log}, self.state_file)
 
     def _load_state(self) -> None:
-        try:
-            with open(self.state_file, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            self.thought_log = data.get("thoughts", [])
-        except FileNotFoundError:
-            self.thought_log = []
+        data = read_ltm(self.state_file, default={}) or {}
+        self.thought_log = data.get("thoughts", [])
 
     # ---------------- heartbeat -----------------
     def _start_heartbeat(self) -> None:

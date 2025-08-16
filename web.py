@@ -262,7 +262,7 @@ def state():
     })
 
 def run(host: str = '127.0.0.1', port: int = 5000) -> None:
-    app.run(host=host, port=port)
+    app.run(host=host, port=port, debug=False, use_reloader=False, threaded=False)
 
 if __name__ == '__main__':
     run()

@@ -20,6 +20,7 @@ from decision_trace import DecisionTracer
 from world_model import WorldModel
 from goals import GoalManager
 from memory_graph import MemoryGraph
+from ltm_store import read_ltm, write_ltm
 from emotion import EmotionSystem
 from planner import ActionPlanner
 from theory_of_mind import TheoryOfMind
@@ -282,22 +283,15 @@ class Requiem:
 
     # ------------------ memory ------------------
     def _load_ltm(self) -> List[MemoryItem]:
+        data = read_ltm(self.ltm_file, default=[])
         try:
-            with open(self.ltm_file, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                return [MemoryItem(**item) for item in data]
-        except FileNotFoundError:
-            with open(self.ltm_file, "w", encoding="utf-8") as f:
-                json.dump([], f)
-            return []
-        except json.JSONDecodeError:
-            with open(self.ltm_file, "w", encoding="utf-8") as f:
-                json.dump([], f)
+            return [MemoryItem(**item) for item in data]
+        except Exception:
+            write_ltm([], self.ltm_file)
             return []
 
     def _save_ltm(self) -> None:
-        with open(self.ltm_file, "w", encoding="utf-8") as f:
-            json.dump([item.__dict__ for item in self.ltm], f, indent=2)
+        write_ltm([item.__dict__ for item in self.ltm], self.ltm_file)
 
     def _store(self, item: MemoryItem) -> None:
         self.stm.append(item)
@@ -336,11 +330,7 @@ class Requiem:
 
     # ----------- persistent state & emotions -----------
     def _load_state(self) -> None:
-        try:
-            with open(self.state_file, "r", encoding="utf-8") as f:
-                data = json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            data = {}
+        data = read_ltm(self.state_file, default={}) or {}
         self.persona = data.get("persona", self.persona)
         self.gender = data.get("gender", self.gender)
         self.model = data.get("model", self.model)
@@ -368,8 +358,7 @@ class Requiem:
             "self_model": self.self_model.to_dict(),
             "goals": self.goals.goals,
         }
-        with open(self.state_file, "w", encoding="utf-8") as f:
-            json.dump(data, f, indent=2)
+        write_ltm(data, self.state_file)
         self.self_preservation.backup()
 
     def _auto_adjust_emotions(self, text: str) -> None:

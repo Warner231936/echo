@@ -1,8 +1,11 @@
-"""Utility to fetch open source LLM weights for offline use."""
+"""Utility to fetch open source, instruction-tuned LLM weights for offline use."""
 from huggingface_hub import snapshot_download
 
+# Map of instruction-following model aliases to their HuggingFace repositories.
+# Only models that are explicitly instruction-tuned are listed here so that the
+# system does not accidentally download base models.
 MODELS = {
-    "openllm": "openlm-research/open_llama_3b",
+    "mistral": "mistralai/Mistral-7B-Instruct-v0.2",
     "gaia": "gaianet/gemma-3-270m-it-GGUF",
 }
 

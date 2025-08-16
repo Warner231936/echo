@@ -23,3 +23,7 @@ python3 -m pip install --upgrade pip
 python3 -m pip install --upgrade torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 python3 -m pip install --upgrade transformers accelerate safetensors sentencepiece
 python3 -m pip install autoawq requests pymongo flask psutil
+
+# Fetch instruction-tuned model weights so they are available immediately after
+# setup completes.
+python3 download_models.py

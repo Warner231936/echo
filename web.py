@@ -90,7 +90,12 @@ async function poll() {
   document.getElementById('thoughts').innerHTML = data.thoughts.map(t => `<div>${t}</div>`).join('');
   document.getElementById('actions').innerHTML = data.actions.map(a => `<div>${a}</div>`).join('');
   const status = data.status || {};
-  document.getElementById('status').innerHTML = Object.entries(status).map(([k,v]) => `<div>${k}: ${v}</div>`).join('');
+  document.getElementById('status').innerHTML = Object.entries(status)
+    .map(([k, v]) => {
+      const val = (v && typeof v === 'object') ? JSON.stringify(v) : v;
+      return `<div>${k}: ${val}</div>`;
+    })
+    .join('');
 }
 setInterval(poll, 1000);
 </script>

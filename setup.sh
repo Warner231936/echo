@@ -20,4 +20,4 @@ sudo apt-get install -y nvidia-cuda-toolkit || echo "CUDA toolkit installation f
 
 # ---- Python Dependencies ----
 python3 -m pip install --upgrade pip
-python3 -m pip install requests pymongo torch mistralai flask transformers psutil --index-url https://download.pytorch.org/whl/cpu
+python3 -m pip install requests pymongo torch flask transformers psutil openllm --index-url https://download.pytorch.org/whl/cpu

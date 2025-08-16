@@ -6,6 +6,10 @@
   "run code ": "run_code",
   "talk to yourself": "self_talk",
   "self talk": "self_talk",
+  "check resources": "resources",
+  "resource status": "resources",
+  "system status": "status",
+  "status report": "status",
   "search web ": "web_search",
   "wiki ": "web_search"
 }

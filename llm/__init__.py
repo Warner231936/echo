@@ -3,6 +3,13 @@ from typing import Optional, List
 
 from .base import BaseLLM
 
+# Known aliases for heavier open models
+ALIASES = {
+    "openllm": "openlm-research/open_llama_3b",
+    "open_llama": "openlm-research/open_llama_3b",
+    "gaia": "gaianet/gemma-3-270m-it-GGUF",
+}
+
 
 class EchoLLM(BaseLLM):
     """Fallback model that simply echoes the user input."""
@@ -23,8 +30,13 @@ def _candidate_models(preferred: Optional[str]) -> List[str]:
     env_model = os.environ.get("LLM_MODEL")
     if env_model:
         candidates.append(env_model)
-    # include common small models as fallbacks
-    candidates.extend(["distilgpt2", "sshleifer/tiny-gpt2"])
+    # include common small models as fallbacks, then larger community models
+    candidates.extend([
+        "distilgpt2",
+        "sshleifer/tiny-gpt2",
+        "openlm-research/open_llama_3b",
+        "gaianet/gemma-3-270m-it-GGUF",
+    ])
     seen = set()
     return [m for m in candidates if not (m in seen or seen.add(m))]
 
@@ -32,26 +44,14 @@ def _candidate_models(preferred: Optional[str]) -> List[str]:
 def load_llm(model: str = "distilgpt2") -> BaseLLM:
     """Return an available language model client, always ensuring speech capability."""
 
-    api_key = os.environ.get("MISTRAL_API_KEY")
     models = _candidate_models(model)
-
-    if api_key:
-        try:
-            from .mistral import MistralLLM
-            for name in models:
-                if name.startswith("mistral"):
-                    try:
-                        return MistralLLM(api_key, name)
-                    except Exception:  # pragma: no cover - network/import issues
-                        continue
-        except Exception:  # pragma: no cover - import issues
-            pass
 
     try:
         from .hf import HuggingFaceLLM
         for name in models:
+            target = ALIASES.get(name, name)
             try:
-                return HuggingFaceLLM(name)
+                return HuggingFaceLLM(target)
             except Exception:
                 continue
     except Exception:

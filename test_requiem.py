@@ -27,11 +27,11 @@ def test_memory_recall(tmp_path):
 def test_llm_client(tmp_path):
     class DummyLLM:
         def reply(self, text, last_user):
-            return "mistral says hi"
+            return "local model says hi"
 
     ltm_file = tmp_path / "ltm.json"
     rq = Requiem(llm=DummyLLM(), heartbeat=1000, ltm_file=str(ltm_file))
-    assert rq.receive_input("hello") == "mistral says hi"
+    assert rq.receive_input("hello") == "local model says hi"
 
 
 def test_recall_keyword(tmp_path):
@@ -104,6 +104,28 @@ def test_friend_talk(tmp_path):
     rq = Requiem(ltm_file=str(ltm_file), heartbeat=1000, friend=Friend())
     out = rq.receive_input("ask strelitzia how are you")
     assert "hello requiem" in out
+
+
+def test_idle_chatter(tmp_path):
+    class DummyLLM:
+        def reply(self, text, last_user):
+            return "idle thought"
+
+    class Friend:
+        def __init__(self):
+            self.calls = 0
+
+        def receive_input(self, text):
+            self.calls += 1
+            return "hi"
+
+    ltm_file = tmp_path / "ltm.json"
+    rq = Requiem(ltm_file=str(ltm_file), heartbeat=0.05, llm=DummyLLM(), friend=Friend())
+    rq.idle_threshold = 0.1
+    initial = len(rq.get_thoughts())
+    time.sleep(0.3)
+    assert len(rq.get_thoughts()) > initial
+    assert rq.friend.calls > 0
 
 
 def test_action_and_thought_logs(tmp_path):
@@ -305,3 +327,27 @@ def test_metacognitive_analysis_updates_self_model(tmp_path):
     with open(state_file, "r", encoding="utf-8") as f:
         data = json.load(f)
     assert "self_model" in data and data["self_model"]
+
+
+def test_resource_query(tmp_path):
+    ltm_file = tmp_path / "ltm.json"
+    rq = Requiem(ltm_file=str(ltm_file), heartbeat=1000)
+    reply = rq.receive_input("check resources")
+    data = json.loads(reply)
+    assert {
+        "cpu",
+        "memory",
+        "net_in",
+        "net_out",
+        "load",
+        "disk_free",
+        "disk_total",
+    } <= data.keys()
+
+
+def test_status_query(tmp_path):
+    ltm_file = tmp_path / "ltm.json"
+    rq = Requiem(ltm_file=str(ltm_file), heartbeat=1000)
+    reply = rq.receive_input("system status")
+    data = json.loads(reply)
+    assert "os" in data and "uptime" in data

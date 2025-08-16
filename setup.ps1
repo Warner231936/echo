@@ -17,4 +17,4 @@ choco install -y python
 
 python -m pip install --upgrade pip
 pip install requests pymongo torch
-pip install mistralai flask transformers psutil
+pip install flask transformers psutil openllm

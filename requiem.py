@@ -113,6 +113,10 @@ class IntentEngine:
                 "run code ": "run_code",
                 "talk to yourself": "self_talk",
                 "self talk": "self_talk",
+                "check resources": "resources",
+                "resource status": "resources",
+                "system status": "status",
+                "status report": "status",
                 "search web ": "web_search",
                 "wiki ": "web_search",
             }
@@ -216,7 +220,7 @@ class Requiem:
         self.intent = IntentEngine(intent_file)
         self.lie_engine = lie_engine or LieEngine()
         self.guard = guard or FileGuard({"lie_log.json"})
-        self.free_will = FreeWillEngine()
+        self.free_will = FreeWillEngine(monologue_delay=30 * 60)
         self.i = ISystem(self)
         self.moral = MoralFramework()
         self.self_preservation = SelfPreservation([self.state_file, self.ltm_file])
@@ -249,6 +253,8 @@ class Requiem:
         self.explain_engine = ExplainabilityEngine()
         self.memory_paladin = MemoryPaladin([self.state_file, self.ltm_file])
         self.approver = approver
+        self.idle_threshold = 30 * 60  # 30 minutes
+        self.idle_toggle = True
         self.last_interaction: Optional[Tuple[str, str]] = None
         if psutil:
             self.world.register_sensor("cpu", lambda: psutil.cpu_percent())
@@ -372,15 +378,17 @@ class Requiem:
 
     # ------------- resources & models ---------
     def get_resources(self) -> Dict[str, Any]:
-        """Return a snapshot of free disk space and compute availability."""
-        free = shutil.disk_usage(".").free
+        """Return a snapshot of system resources."""
+        info = self.resource_manager.sample()
+        disk = shutil.disk_usage(".")
         gpu = False
         try:  # pragma: no cover - torch may be missing
             import torch
             gpu = torch.cuda.is_available()
         except Exception:
             pass
-        return {"disk_free": free, "gpu": gpu}
+        info.update({"disk_free": disk.free, "disk_total": disk.total, "gpu": gpu})
+        return info
 
     def _check_resources(self, model: str) -> Tuple[bool, str]:
         info = self.get_resources()
@@ -483,6 +491,12 @@ class Requiem:
             self.action_log.append(f"threats detected: {', '.join(threats)}")
         if self.free_will.should_self_talk(self.last_input_time, self.last_thought_time):
             self.self_talk(turns=1)
+        if now - self.last_input_time > self.idle_threshold:
+            if self.idle_toggle:
+                self.self_talk(turns=1)
+            else:
+                self.talk_to_friend("We're waiting for the user to return.")
+            self.idle_toggle = not self.idle_toggle
         if self.planner.has_actions() and self.cognitive.request("plan"):
             planned = self.planner.next_action()
             self.action_log.append(f"planned: {planned}")
@@ -600,6 +614,7 @@ class Requiem:
             cf = self.counterfactual.simulate(text)
             self.thought_log.append(f"counterfactual: {cf}")
         self.last_input_time = time.time()
+        self.idle_toggle = True
 
         user_state = self.tom.infer(text)
         trace = self.tracer.start(text, user_state)
@@ -707,6 +722,12 @@ class Requiem:
         elif intent == "self_talk":
             reply = self.self_talk()
 
+        elif intent == "resources":
+            reply = json.dumps(self.get_resources())
+
+        elif intent == "status":
+            reply = json.dumps(self.get_status())
+
         elif intent == "run_code":
             code = text[len("run code ") :]
             reply = self.run_code(code).strip() or "(no output)"
@@ -773,6 +794,10 @@ class Requiem:
             gb = res["disk_free"] / (1024 ** 3)
             gpu = "yes" if res["gpu"] else "no"
             reply = f"Free disk: {gb:.1f} GB; GPU: {gpu}"
+
+        elif lower.startswith("status"):
+            st = self.get_status()
+            reply = f"OS: {st['os']}; Uptime: {st['uptime']}s"
 
         elif lower.startswith("add goal "):
             gtext = text[len("add goal ") :].strip()

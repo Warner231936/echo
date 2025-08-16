@@ -30,6 +30,8 @@ Recent additions introduce:
   human‑readable justifications.
 - **Memory Paladin** (`memory_paladin.py`) guarding core memory files via
   checksums and integrity verification.
+- **Idle chatter** – after 30 minutes without user input, Requiem alternates
+  between self‑talk and friendly chats with Strelitzia until the user returns.
 
 ## I System
 
@@ -78,18 +80,10 @@ bash setup.sh
 ## LLMs
 
 Model clients live in the `llm/` directory. By default Requiem falls back to
-an echo model, but it can use providers such as Mistral when configured or any
-Hugging Face model by name. To
-enable Mistral install the `mistralai` package and provide an API key via the
-`MISTRAL_API_KEY` environment variable:
-
-```bash
-export MISTRAL_API_KEY="your-key"
-pip install mistralai
-```
-
-Without a key the assistant tries to load a small Hugging Face model such as
-`distilgpt2`. Switch models at runtime with the chat command:
+an echo model, but it can load any local Hugging Face model by name. All
+models run on your machine so you are free to modify them without relying on
+external APIs. If a model is unavailable the assistant tries to load a small
+one such as `distilgpt2`. Switch models at runtime with the chat command:
 
 ```
 set model gpt2
@@ -102,6 +96,18 @@ ask strelitzia <question>
 ```
 
 to receive her supportive guidance. Swap her model with `set friend model <name>` if desired.
+
+### OpenLLM and Gaia
+
+A small helper downloads community models like **OpenLLaMA** and **Gaia** for
+offline use:
+
+```
+python download_models.py
+```
+
+This script fetches weights under `models/` and you can switch to them with
+`set model openllm` or `set model gaia`.
 
 ## Web UI and Login
 
@@ -117,7 +123,8 @@ under `database/users.db`. A default user exists with credentials
 actions, and system status panels that update in real time.
 
 Requiem checks free disk space and GPU availability before loading new models
-and warns if resources appear limited.
+and warns if resources appear limited. The `resources` command reports CPU,
+memory, load average, network I/O, disk usage, and whether a GPU is present.
 
 If transformers are unavailable it falls back to a simple echo model.
 
@@ -142,7 +149,8 @@ While chatting you can ask it to remember notes:
 - `what gender are you`
 - `set model distilgpt2`
 - `set alt model gpt2` – load a secondary model used for creative prompts
-- `resources` – show free disk space and GPU status
+- `resources` – show CPU, memory, disk, network stats, and GPU status
+- `status` – show OS, uptime and model info
 - `remind me to feed the cat in 5 seconds`
 - `check reminders`
 - `talk to yourself` – trigger a short internal dialog

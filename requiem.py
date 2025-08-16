@@ -287,6 +287,12 @@ class Requiem:
                 data = json.load(f)
                 return [MemoryItem(**item) for item in data]
         except FileNotFoundError:
+            with open(self.ltm_file, "w", encoding="utf-8") as f:
+                json.dump([], f)
+            return []
+        except json.JSONDecodeError:
+            with open(self.ltm_file, "w", encoding="utf-8") as f:
+                json.dump([], f)
             return []
 
     def _save_ltm(self) -> None:

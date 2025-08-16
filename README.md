@@ -218,7 +218,8 @@ Requiem treats the integrity of its memory as survival. A small
 `SelfPreservation` watchdog monitors core files like `state.json` and
 `ltm.json`. Each heartbeat it checks for missing or modified files and writes
 timestamped backups under `backups/` so the assistant can restore itself after
-crashes or deletion.
+crashes or deletion. On startup Requiem now creates these files if missing so
+the watchdog doesn't repeatedly report absent memory.
 Incoming commands are screened through the same watchdog so attempts to tamper
 with core identity files or the guiding ethic are blocked before execution.
 

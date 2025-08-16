@@ -7,6 +7,10 @@ class HuggingFaceLLM(BaseLLM):
         from transformers import pipeline  # lazy import
 
         self.pipe = pipeline("text-generation", model=model, max_new_tokens=50)
+        # Explicitly set pad token to suppress transformers warning
+        if self.pipe.model.config.pad_token_id is None:
+            self.pipe.model.config.pad_token_id = self.pipe.tokenizer.eos_token_id
+            self.pipe.tokenizer.pad_token_id = self.pipe.model.config.pad_token_id
 
     def reply(self, text: str, last_user):
         prompt = text

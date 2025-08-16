@@ -6,6 +6,6 @@ database/
 lie_log.json
 backups/
 reflections_train.txt
-dream_*.png
+dreams/
 feedback.jsonl
 paladin.json

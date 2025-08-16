@@ -110,33 +110,93 @@ setInterval(poll, 1000);
 </html>
 """
 
+
 LOGIN_HTML = r"""
 <!doctype html>
 <html>
 <head>
   <title>Requiem Portal Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    body { background:#000; color:#0f0; font-family:monospace; height:100vh; margin:0; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; }
-    pre { margin-top:0; margin-bottom:auto; text-align:center; color:#0f0; }
-    form { margin-bottom:10%; display:flex; flex-direction:column; align-items:center; }
-    input { margin:0.5em; padding:0.5em; background:#111; border:1px solid #0f0; color:#0f0; border-radius:4px; }
-    button { padding:0.5em 1em; background:#0f0; color:#000; border:none; border-radius:4px; cursor:pointer; }
+    body {
+      margin:0;
+      height:100vh;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      background:#000;
+      color:#fff;
+      font-family:'Orbitron', sans-serif;
+      background-image:
+        radial-gradient(circle at center, rgba(255,0,255,0.15) 0, rgba(0,0,0,0) 60%),
+        linear-gradient(rgba(255,0,255,0.2) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,0,255,0.2) 1px, transparent 1px);
+      background-size:100% 100%,40px 40px,40px 40px;
+    }
+    .header { text-align:center; margin-bottom:40px; }
+    .header .symbols { font-size:32px; color:#ff00ff; }
+    .header h1 { margin:0; font-size:48px; color:#00ffff; text-shadow:0 0 10px #00ffff; }
+    .header h2 { margin:0; font-size:20px; color:#ff00ff; text-shadow:0 0 6px #ff00ff; }
+    .login-box {
+      background:rgba(0,0,0,0.5);
+      border:2px solid #ff00ff;
+      border-radius:10px;
+      padding:40px 30px;
+      box-shadow:0 0 15px #ff00ff;
+      display:flex;
+      flex-direction:column;
+      gap:20px;
+      min-width:300px;
+    }
+    .input-group { position:relative; }
+    .input-group span {
+      position:absolute;
+      left:10px;
+      top:50%;
+      transform:translateY(-50%);
+      color:#ff00ff;
+    }
+    .input-group input {
+      width:100%;
+      padding:10px 10px 10px 35px;
+      background:transparent;
+      border:1px solid #ff00ff;
+      border-radius:4px;
+      color:#fff;
+    }
+    .input-group input::placeholder { color:#ff99ff; }
+    button {
+      padding:10px;
+      background:#ff00ff;
+      color:#000;
+      font-weight:bold;
+      border:none;
+      border-radius:4px;
+      cursor:pointer;
+      text-transform:uppercase;
+      box-shadow:0 0 10px #ff00ff;
+    }
   </style>
 </head>
 <body>
-<pre>
- ____                  _                  ____            _        _
-|  _ \ ___  __ _ _   _(_) ___ _ __ ___   |  _ \ ___  _ __| |_ __ _| |
-| |_) / _ \/ _` | | | | |/ _ \ '_ ` _ \  | |_) / _ \| '__| __/ _` | |
-|  _ <  __/ (_| | |_| | |  __/ | | | | | |  __/ (_) | |  | || (_| | |
-|_| \_\___|\__, |\__,_|_|\___|_| |_| |_| |_|   \___/|_|   \__\__,_|_|
-              |_|                                                    
-</pre>
-<form method="post">
-  <input name="username" placeholder="username" />
-  <input type="password" name="password" placeholder="password" />
-  <button type="submit">Login</button>
-</form>
+  <div class="header">
+    <div class="symbols">◇ ⊙ Σ</div>
+    <h1>REQUIEM</h1>
+    <h2>SPIRAL ACCESS</h2>
+  </div>
+  <form class="login-box" method="post">
+    <div class="input-group">
+      <span>📧</span>
+      <input name="username" placeholder="Email" />
+    </div>
+    <div class="input-group">
+      <span>🔒</span>
+      <input type="password" name="password" placeholder="Password" />
+    </div>
+    <button type="submit">Sign In</button>
+  </form>
 </body>
 </html>
 """

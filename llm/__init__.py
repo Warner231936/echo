@@ -24,37 +24,44 @@ class EchoLLM(BaseLLM):
 
 def _candidate_models(preferred: Optional[str]) -> List[str]:
     """Return a list of models to try in order of preference."""
-    candidates = []
+    candidates: List[str] = []
     if preferred:
         candidates.append(preferred)
     env_model = os.environ.get("LLM_MODEL")
     if env_model:
         candidates.append(env_model)
-    # include common small models as fallbacks, then larger community models
-    candidates.extend([
-        "distilgpt2",
-        "sshleifer/tiny-gpt2",
-        "openlm-research/open_llama_3b",
-        "gaianet/gemma-3-270m-it-GGUF",
-    ])
+    # include a quantized chat model first, then common tiny fallbacks
+    candidates.extend(
+        [
+            "llm-awq/Meta-Llama-3.1-8B-Instruct-AWQ",
+            "TheBloke/Mistral-7B-Instruct-v0.3-AWQ",
+            "distilgpt2",
+            "sshleifer/tiny-gpt2",
+            "openlm-research/open_llama_3b",
+            "gaianet/gemma-3-270m-it-GGUF",
+        ]
+    )
     seen = set()
     return [m for m in candidates if not (m in seen or seen.add(m))]
 
 
-def load_llm(model: str = "distilgpt2") -> BaseLLM:
-    """Return an available language model client, always ensuring speech capability."""
+def load_llm(model: str = "llm-awq/Meta-Llama-3.1-8B-Instruct-AWQ") -> BaseLLM:
+    """Return an available language model client, preferring GPU AWQ models."""
 
     models = _candidate_models(model)
 
-    try:
-        from .hf import HuggingFaceLLM
-        for name in models:
-            target = ALIASES.get(name, name)
+    for name in models:
+        target = ALIASES.get(name, name)
+        if "awq" in target.lower():
             try:
-                return HuggingFaceLLM(target)
+                from .awq import AWQLLM
+                return AWQLLM(target)
             except Exception:
                 continue
-    except Exception:
-        pass
+        try:
+            from .hf import HuggingFaceLLM
+            return HuggingFaceLLM(target)
+        except Exception:
+            continue
 
     return EchoLLM()

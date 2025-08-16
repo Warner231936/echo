@@ -16,5 +16,6 @@ choco install -y cuda
 choco install -y python
 
 python -m pip install --upgrade pip
-pip install requests pymongo torch
-pip install flask transformers psutil openllm
+pip install --upgrade torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip install --upgrade transformers accelerate safetensors sentencepiece
+pip install autoawq requests pymongo flask psutil

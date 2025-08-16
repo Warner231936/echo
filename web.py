@@ -8,6 +8,9 @@ from requiem import Requiem
 app = Flask(__name__)
 app.secret_key = "changeme"  # pragma: no cover - development key
 
+# Optional token used by external services (e.g. Discord bot) to access the API
+DISCORD_API_TOKEN = os.environ.get("DISCORD_API_TOKEN")
+
 DB_PATH = os.path.join(os.path.dirname(__file__), "database", "users.db")
 
 
@@ -130,6 +133,24 @@ def logout():
 def chat():
     if 'user' not in session:
         return jsonify({'error': 'unauthorized'}), 401
+    data = request.get_json(force=True)
+    text = data.get('message', '')
+    reply = rq.receive_input(text)
+    return jsonify({'reply': reply})
+
+
+@app.route('/api/discord', methods=['POST'])
+def discord_chat():
+    """Endpoint for external services like a Discord bot.
+
+    If ``DISCORD_API_TOKEN`` is set, requests must include an ``Authorization``
+    header of the form ``Bearer <token>``. Unlike ``/api/chat`` this endpoint
+    does not require a login session.
+    """
+    if DISCORD_API_TOKEN:
+        auth = request.headers.get('Authorization', '')
+        if auth != f'Bearer {DISCORD_API_TOKEN}':
+            return jsonify({'error': 'unauthorized'}), 401
     data = request.get_json(force=True)
     text = data.get('message', '')
     reply = rq.receive_input(text)

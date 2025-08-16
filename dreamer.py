@@ -20,10 +20,12 @@ class Dreamer:
         except Exception:
             pass
         img_name = f"dream_{int(time.time())}.png"
-        img_path = Path(img_name)
+        img_dir = Path("dreams")
+        img_dir.mkdir(exist_ok=True)
+        img_path = img_dir / img_name
         if not img_path.exists():
             data = base64.b64decode(
                 "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGMAAQAABQABDQottAAAAABJRU5ErkJggg=="
             )
             img_path.write_bytes(data)
-        return {"text": text, "image": img_name}
+        return {"text": text, "image": str(img_path)}

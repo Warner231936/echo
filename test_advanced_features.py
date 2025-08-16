@@ -38,7 +38,9 @@ def test_dreamer_generates_image(tmp_path, monkeypatch):
     d = Dreamer(DummyLLM())
     monkeypatch.chdir(tmp_path)
     result = d.dream()
-    assert Path(result["image"]).exists()
+    img_path = Path(result["image"])
+    assert img_path.exists()
+    assert img_path.parent.name == "dreams"
 
 
 def test_cognitive_load():

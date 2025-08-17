@@ -170,7 +170,7 @@ class Requiem:
         state_file: Optional[str] = None,
         heartbeat: int = 5,
         llm: Optional[object] = None,
-        model: str = "llm-awq/Meta-Llama-3.1-8B-Instruct-AWQ",
+        model: str = "TheBloke/Mistral-7B-Instruct-v0.3-AWQ",
         friend: Optional[Strelitzia] = None,
         friend_model: str = "distilgpt2",
         persona: str = "neutral",

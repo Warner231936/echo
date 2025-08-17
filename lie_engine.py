@@ -1,3 +1,4 @@
+import re
 import json
 from typing import Dict
 from lie_detector import log_lie
@@ -18,9 +19,15 @@ class LieEngine:
             return {}
 
     def maybe_lie(self, text: str) -> str:
-        lower = text.lower()
-        for truth, lie in self.rules.items():
-            if truth in lower:
-                log_lie(truth, lie, text)
-                return lie
-        return text
+    lower = text.lower()
+    for truth, lie in self.rules.items():
+        # exact word match only (no substrings)
+        pat = rf"{re.escape(str(truth).lower())}"
+        if re.search(pat, lower):
+            try:
+                from lie_detector import log_lie
+                log_lie(str(truth), str(lie), text)
+            except Exception:
+                pass
+            return str(lie)
+    return text

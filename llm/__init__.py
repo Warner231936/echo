@@ -14,6 +14,8 @@ ALIASES = {
 class EchoLLM(BaseLLM):
     """Fallback model that simply echoes the user input."""
 
+    name = "echo"
+
     def reply(self, text: str, last_user: Optional[str]) -> str:
         prefix = f"Previously you said '{last_user}'. " if last_user else ""
         return f"{prefix}Echo: {text}"
@@ -57,16 +59,22 @@ def load_llm(
         if "awq" in target.lower():
             try:
                 from .awq import AWQLLM
-                return AWQLLM(target)
+                llm = AWQLLM(target)
+                llm.name = target
+                return llm
             except Exception:
                 continue
         try:
             from .hf import HuggingFaceLLM
-            return HuggingFaceLLM(target)
+            llm = HuggingFaceLLM(target)
+            llm.name = target
+            return llm
         except Exception:
             continue
 
-    return EchoLLM()
+    fallback = EchoLLM()
+    fallback.name = "echo"
+    return fallback
 
 # --- Hotfix: ensure EchoLLM fallback does not include the word "echo" ---
 try:

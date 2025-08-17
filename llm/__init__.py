@@ -33,8 +33,8 @@ def _candidate_models(preferred: Optional[str]) -> List[str]:
     # include a quantized chat model first, then common tiny fallbacks
     candidates.extend(
         [
-            "llm-awq/Meta-Llama-3.1-8B-Instruct-AWQ",
             "TheBloke/Mistral-7B-Instruct-v0.3-AWQ",
+            "llm-awq/Meta-Llama-3.1-8B-Instruct-AWQ",
             "distilgpt2",
             "sshleifer/tiny-gpt2",
             "openlm-research/open_llama_3b",
@@ -45,7 +45,9 @@ def _candidate_models(preferred: Optional[str]) -> List[str]:
     return [m for m in candidates if not (m in seen or seen.add(m))]
 
 
-def load_llm(model: str = "llm-awq/Meta-Llama-3.1-8B-Instruct-AWQ") -> BaseLLM:
+def load_llm(
+    model: str = "TheBloke/Mistral-7B-Instruct-v0.3-AWQ",
+) -> BaseLLM:
     """Return an available language model client, preferring GPU AWQ models."""
 
     models = _candidate_models(model)

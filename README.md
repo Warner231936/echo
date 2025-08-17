@@ -82,11 +82,12 @@ long-term memory updates.
 
 ## LLMs
 
-Model clients live in the `llm/` directory. By default Requiem falls back to
-an echo model, but it can load any local Hugging Face model by name. All
-models run on your machine so you are free to modify them without relying on
-external APIs. If a model is unavailable the assistant tries to load a small
-one such as `distilgpt2`. Switch models at runtime with the chat command:
+Model clients live in the `llm/` directory. By default Requiem attempts to
+load a local Mistral model, falling back to an echo model if nothing else is
+available. All models run on your machine so you are free to modify them
+without relying on external APIs. If a model is unavailable the assistant
+tries to load a small one such as `distilgpt2`. Switch models at runtime with
+the chat command:
 
 ```
 set model gpt2

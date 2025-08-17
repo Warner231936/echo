@@ -79,7 +79,7 @@ INDEX_HTML = """
     }
     #chat {
       width:600px;
-      height:400px;
+      height:500px;
       border:1px solid #ff00ff;
       border-radius:6px;
       background:#111;
@@ -88,14 +88,14 @@ INDEX_HTML = """
       box-sizing:border-box;
     }
     #side {
-      width:300px;
-      height:400px;
+      width:350px;
+      height:500px;
       display:flex;
       flex-direction:column;
       gap:20px;
     }
     #thoughts, #actions, #status {
-      height:120px;
+      height:150px;
       border:1px solid #00ffff;
       border-radius:6px;
       background:#111;

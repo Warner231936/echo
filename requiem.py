@@ -186,11 +186,12 @@ class Requiem:
         self.ltm: List[MemoryItem] = self._load_ltm()
         self.policy = PolicyEngine()
         self.heartbeat_interval = heartbeat
-        self.model = model
         self.llm = llm or load_llm(model)
+        self.model = getattr(self.llm, "name", model)
         # defaults
         self.alt_model = "gpt2"
         self.alt_llm = load_llm(self.alt_model)
+        self.alt_model = getattr(self.alt_llm, "name", self.alt_model)
         self.persona = persona
         self.gender = gender
         self.friend_model = friend_model
@@ -344,8 +345,10 @@ class Requiem:
         # reload models if state specifies different ones
         if self.model != getattr(self.llm, "name", self.model):  # pragma: no cover - heuristic
             self.llm = load_llm(self.model)
+            self.model = getattr(self.llm, "name", self.model)
         if self.alt_model and self.alt_model != getattr(self.alt_llm, "name", self.alt_model):
             self.alt_llm = load_llm(self.alt_model)
+            self.alt_model = getattr(self.alt_llm, "name", self.alt_model)
 
     def _save_state(self) -> None:
         data = {
@@ -406,8 +409,8 @@ class Requiem:
         if not ok:
             return f"Cannot load {model}: {msg}"
         self.llm = load_llm(model)
-        self.model = model
-        reply = f"Model set to {model}."
+        self.model = getattr(self.llm, "name", model)
+        reply = f"Model set to {self.model}."
         if msg:
             reply += f" {msg}"
         self._save_state()
@@ -418,8 +421,8 @@ class Requiem:
         if not ok:
             return f"Cannot load {model}: {msg}"
         self.alt_llm = load_llm(model)
-        self.alt_model = model
-        reply = f"Alternate model set to {model}."
+        self.alt_model = getattr(self.alt_llm, "name", model)
+        reply = f"Alternate model set to {self.alt_model}."
         if msg:
             reply += f" {msg}"
         self._save_state()
@@ -592,8 +595,8 @@ class Requiem:
     def set_friend_model(self, model: str) -> str:
         try:
             self.friend = Strelitzia(model=model)
-            self.friend_model = model
-            return f"Friend model set to {model}."
+            self.friend_model = getattr(self.friend.llm, "name", model)
+            return f"Friend model set to {self.friend_model}."
         except Exception as e:  # pragma: no cover - loading may fail
             return f"Failed to set friend model: {e}"
 
@@ -932,6 +935,8 @@ class Requiem:
             thought_win.scrollok(True)
             action_win.scrollok(True)
 
+            chat_win.addstr(f"model: {self.model}\n")
+
             running = True
 
             def updater():
@@ -972,7 +977,7 @@ class Requiem:
         curses.wrapper(ui)
 
     def _plain_chat(self) -> None:
-        print("Requiem ready. Type 'exit' to quit.")
+        print(f"Requiem ready (model: {self.model}). Type 'exit' to quit.")
         while True:
             try:
                 text = input("you> ")

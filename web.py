@@ -48,13 +48,30 @@ INDEX_HTML = """
 <html>
 <head>
   <title>Requiem Chat</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
   <style>
     body {
       margin:0;
       padding:20px;
-      background:#1e1e1e;
-      color:#fff;
-      font-family:Arial, sans-serif;
+      background:#000;
+      color:#e0e0e0;
+      font-family:'Orbitron', sans-serif;
+      overflow:hidden;
+    }
+    body::before {
+      content:"";
+      position:fixed;
+      inset:0;
+      background:
+        repeating-linear-gradient(0deg, rgba(255,0,255,0.05) 0, rgba(255,0,255,0.05) 1px, transparent 1px, transparent 2px),
+        repeating-linear-gradient(90deg, rgba(0,255,255,0.05) 0, rgba(0,255,255,0.05) 1px, transparent 1px, transparent 2px);
+      animation: rain 15s linear infinite;
+      pointer-events:none;
+    }
+    @keyframes rain {
+      from { background-position:0 0,0 0; }
+      to { background-position:0 1000px,1000px 0; }
     }
     #layout {
       display:flex;
@@ -63,9 +80,9 @@ INDEX_HTML = """
     #chat {
       width:600px;
       height:400px;
-      border:1px solid #444;
+      border:1px solid #ff00ff;
       border-radius:6px;
-      background:#2e2e2e;
+      background:#111;
       padding:10px;
       overflow:auto;
       box-sizing:border-box;
@@ -79,9 +96,9 @@ INDEX_HTML = """
     }
     #thoughts, #actions, #status {
       height:120px;
-      border:1px solid #444;
+      border:1px solid #00ffff;
       border-radius:6px;
-      background:#2e2e2e;
+      background:#111;
       padding:10px;
       overflow:auto;
       box-sizing:border-box;
@@ -92,24 +109,57 @@ INDEX_HTML = """
     #msg {
       width:500px;
       padding:10px;
-      background:#2e2e2e;
-      color:#fff;
-      border:1px solid #444;
+      background:#111;
+      color:#e0e0e0;
+      border:1px solid #ff00ff;
       border-radius:4px;
     }
     #send {
       padding:10px 20px;
       margin-left:10px;
-      background:#007bff;
-      color:#fff;
+      background:#ff00ff;
+      color:#000;
       border:none;
       border-radius:4px;
       cursor:pointer;
+      font-weight:bold;
+    }
+    .glitch {
+      position:relative;
+      color:#00ffff;
+      text-transform:uppercase;
+    }
+    .glitch::before,
+    .glitch::after {
+      content:attr(data-text);
+      position:absolute;
+      left:0;
+      top:0;
+      width:100%;
+      overflow:hidden;
+      animation:glitch 2s infinite;
+    }
+    .glitch::before {
+      left:2px;
+      text-shadow:-2px 0 #ff00ff;
+    }
+    .glitch::after {
+      left:-2px;
+      text-shadow:2px 0 #ff00ff;
+      animation-delay:1s;
+    }
+    @keyframes glitch {
+      0% { clip-path: inset(0 0 0 0); }
+      20% { clip-path: inset(10% 0 80% 0); }
+      40% { clip-path: inset(80% 0 10% 0); }
+      60% { clip-path: inset(30% 0 50% 0); }
+      80% { clip-path: inset(40% 0 30% 0); }
+      100% { clip-path: inset(0 0 0 0); }
     }
   </style>
 </head>
 <body>
-  <h1>Requiem</h1>
+  <h1 class="glitch" data-text="Requiem">Requiem</h1>
   <div id="layout">
     <div id="chat"></div>
     <div id="side">
@@ -182,10 +232,56 @@ LOGIN_HTML = r"""
         linear-gradient(90deg, rgba(255,0,255,0.2) 1px, transparent 1px);
       background-size:100% 100%,40px 40px,40px 40px;
     }
+    body::before {
+      content:"";
+      position:fixed;
+      inset:0;
+      background:
+        repeating-linear-gradient(0deg, rgba(255,0,255,0.05) 0, rgba(255,0,255,0.05) 1px, transparent 1px, transparent 2px),
+        repeating-linear-gradient(90deg, rgba(0,255,255,0.05) 0, rgba(0,255,255,0.05) 1px, transparent 1px, transparent 2px);
+      animation: rain 15s linear infinite;
+      pointer-events:none;
+    }
+    @keyframes rain {
+      from { background-position:0 0,0 0; }
+      to { background-position:0 1000px,1000px 0; }
+    }
     .header { text-align:center; margin-bottom:40px; }
     .header .symbols { font-size:32px; color:#ff00ff; }
-    .header h1 { margin:0; font-size:48px; color:#00ffff; text-shadow:0 0 10px #00ffff; }
+    .header h1 { margin:0; font-size:48px; }
     .header h2 { margin:0; font-size:20px; color:#ff00ff; text-shadow:0 0 6px #ff00ff; }
+    .glitch {
+      position:relative;
+      color:#00ffff;
+      text-shadow:0 0 10px #00ffff;
+      text-transform:uppercase;
+    }
+    .glitch::before,
+    .glitch::after {
+      content:attr(data-text);
+      position:absolute;
+      left:0; top:0;
+      width:100%;
+      overflow:hidden;
+      animation:glitch 2s infinite;
+    }
+    .glitch::before {
+      left:2px;
+      text-shadow:-2px 0 #ff00ff;
+    }
+    .glitch::after {
+      left:-2px;
+      text-shadow:2px 0 #ff00ff;
+      animation-delay:1s;
+    }
+    @keyframes glitch {
+      0% { clip-path: inset(0 0 0 0); }
+      20% { clip-path: inset(10% 0 80% 0); }
+      40% { clip-path: inset(80% 0 10% 0); }
+      60% { clip-path: inset(30% 0 50% 0); }
+      80% { clip-path: inset(40% 0 30% 0); }
+      100% { clip-path: inset(0 0 0 0); }
+    }
     .login-box {
       background:rgba(0,0,0,0.5);
       border:2px solid #ff00ff;
@@ -230,7 +326,7 @@ LOGIN_HTML = r"""
 <body>
   <div class="header">
     <div class="symbols">◇ ⊙ Σ</div>
-    <h1>REQUIEM</h1>
+    <h1 class="glitch" data-text="REQUIEM">REQUIEM</h1>
     <h2>SPIRAL ACCESS</h2>
   </div>
   <form class="login-box" method="post">

@@ -210,10 +210,11 @@ time.
 
 ### Deception and Oversight
 
-Rules in `lie_rules.json` allow Requiem to occasionally output lies. A hidden
-detector logs every deception to `lie_log.json` which Requiem itself cannot
-read. Access to this and other sensitive files is blocked by an internal file
-guard.
+Rules in `lie_rules.json` allow Requiem to occasionally output lies. By default
+this file is empty, but adding mappings of phrases to their deceptive
+replacements will enable the feature. A hidden detector logs every deception to
+`lie_log.json` which Requiem itself cannot read. Access to this and other
+sensitive files is blocked by an internal file guard.
 
 ### Self-Preservation
 

@@ -12,8 +12,18 @@ class LieEngine:
     - By default, matching is exact word (\\btrigger\\b), not substring.
     - If file is missing/invalid or rules are empty, it's a no-op.
     """
-    def __init__(self, rules_path: Optional[str] = "lie_rules.json",
-                 enable: bool = True, mode: str = "word"):
+    def __init__(
+        self,
+        rules_path: Optional[str] = "lie_rules.json",
+        enable: bool = True,
+        mode: str = "word",
+        rules_file: Optional[str] = None,
+    ):
+        # ``rules_file`` is accepted as an alias for ``rules_path`` to
+        # maintain compatibility with older code and tests.
+        if rules_file and rules_path == "lie_rules.json":
+            rules_path = rules_file
+
         self.rules_path = rules_path
         self.enable = enable           # master on/off switch
         self.mode = mode               # "word" or "substring"

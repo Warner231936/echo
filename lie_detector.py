@@ -1,6 +1,3 @@
-+18
--0
-
 import json
 import time
 from typing import List, Dict

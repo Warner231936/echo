@@ -49,8 +49,25 @@ class FlashConverter:
         # Remove import statements entirely
         js = re.sub(r"^\s*import [^\n]+(?:\n|$)", "", js, flags=re.MULTILINE)
 
-        # Replace trace() calls with console.log(), preserving semicolons if present
-        js = re.sub(r"trace\((.*?)\)(;?)", r"console.log(\1)\2", js)
+        # Replace ``trace`` calls with ``console.log``.
+        #
+        # ActionScript allows whitespace between ``trace`` and its argument list
+        # (``trace ("hi")``). The original implementation didn't handle this
+        # form which meant such statements were left untouched. The updated
+        # pattern below accepts optional spaces after ``trace`` and before an
+        # optional semicolon. We deliberately avoid matching newlines so that
+        # the structure of the surrounding code remains intact when no semicolon
+        # is present.
+        #
+        # ``trace`` can also appear as part of a longer identifier (``mytrace``)
+        # or as a method on an object (``logger.trace``). Those occurrences
+        # should not be replaced, so we require ``trace`` to be a standalone
+        # identifier that is not preceded by a dot.
+        js = re.sub(
+            r"(?<!\.)\btrace\b\s*\((.*?)\)[ \t]*(;?)",
+            r"console.log(\1)\2",
+            js,
+        )
 
         # Replace 'var' with 'let'
         js = re.sub(r"\bvar\b", "let", js)

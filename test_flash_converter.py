@@ -71,3 +71,28 @@ def test_directory_conversion(tmp_path):
 
     assert (dest_root / "main.js").read_text() == expected
     assert (dest_root / "level1" / "helper.js").read_text() == expected
+
+
+def test_object_literals_and_defaults():
+    src_code = textwrap.dedent(
+        """
+        var settings:Object = {foo: 1, bar: 2};
+        function build(config:Object = {w:10, h:20}):Object {
+            trace(config.w);
+        }
+        """
+    ).strip()
+
+    converter = FlashConverter()
+    js = converter.convert_code(src_code)
+
+    expected = textwrap.dedent(
+        """
+        let settings = {foo: 1, bar: 2};
+        function build(config = {w:10, h:20}) {
+            console.log(config.w);
+        }
+        """
+    ).strip()
+
+    assert js == expected

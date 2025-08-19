@@ -24,8 +24,6 @@ class FlashConverter:
     * Function return type annotations are stripped.
     """
 
-    _TYPE_ANNOTATION_RE = re.compile(r":\s*[A-Za-z_][\w]*")
-
     def convert_code(self, action_script: str) -> str:
         """Convert an ActionScript source string to JavaScript.
 
@@ -48,13 +46,20 @@ class FlashConverter:
         # Replace 'var' with 'let'
         js = re.sub(r"\bvar\b", "let", js)
 
-        # Remove type annotations (e.g. ":int", ":String")
-        js = self._TYPE_ANNOTATION_RE.sub("", js)
+        # Remove type annotations from variable declarations
+        js = re.sub(r"\blet\s+([A-Za-z_][\w]*)\s*:\s*[A-Za-z_][\w]*", r"let \1", js)
+
+        # Remove type annotations within parameter lists (e.g. "(x:int, y:String)")
+        js = re.sub(
+            r"(\(|,)\s*([A-Za-z_][\w]*)\s*:\s*[A-Za-z_][\w]*(\s*=\s*[^,\)]+)?",
+            lambda m: f"{m.group(1)}{m.group(2)}{m.group(3) or ''}",
+            js,
+        )
 
         # Remove return type annotations in function declarations.
         js = re.sub(
-            r"function\s+([a-zA-Z_][\w]*)\s*\(([^)]*)\)\s*",  # function head
-            lambda m: f"function {m.group(1)}({m.group(2)}) ",
+            r"(function\s+[a-zA-Z_][\w]*\s*\([^)]*\))\s*:\s*[A-Za-z_][\w]*",
+            r"\1",
             js,
         )
 

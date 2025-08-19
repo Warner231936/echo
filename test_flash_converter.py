@@ -123,6 +123,52 @@ def test_const_and_semicolonless_trace():
     assert js == expected
 
 
+def test_trace_with_space_before_parens():
+    src_code = textwrap.dedent(
+        """
+        trace ('a');
+        trace  ('b');
+        trace\t('c');
+        """
+    ).strip()
+
+    converter = FlashConverter()
+    js = converter.convert_code(src_code)
+
+    expected = textwrap.dedent(
+        """
+        console.log('a');
+        console.log('b');
+        console.log('c');
+        """
+    ).strip()
+
+    assert js == expected
+
+
+def test_trace_not_part_of_identifier_or_method():
+    src_code = textwrap.dedent(
+        """
+        mytrace('a');
+        logger.trace('b');
+        trace('c');
+        """
+    ).strip()
+
+    converter = FlashConverter()
+    js = converter.convert_code(src_code)
+
+    expected = textwrap.dedent(
+        """
+        mytrace('a');
+        logger.trace('b');
+        console.log('c');
+        """
+    ).strip()
+
+    assert js == expected
+
+
 def test_package_and_import_removal():
     src_code = textwrap.dedent(
         """

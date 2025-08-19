@@ -10,6 +10,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 from typing import Union
+import textwrap
 
 
 class FlashConverter:
@@ -40,6 +41,14 @@ class FlashConverter:
 
         js = action_script
 
+        # Remove package declarations and their wrapping braces
+        if re.search(r"^\s*package\b", js, flags=re.MULTILINE):
+            js = re.sub(r"^\s*package[^\{]*{\s*\n?", "", js, flags=re.MULTILINE)
+            js = re.sub(r"\n}\s*$", "", js)
+
+        # Remove import statements entirely
+        js = re.sub(r"^\s*import [^\n]+(?:\n|$)", "", js, flags=re.MULTILINE)
+
         # Replace trace() calls with console.log(), preserving semicolons if present
         js = re.sub(r"trace\((.*?)\)(;?)", r"console.log(\1)\2", js)
 
@@ -67,7 +76,7 @@ class FlashConverter:
             js,
         )
 
-        return js
+        return textwrap.dedent(js).strip()
 
     def convert_file(self, src: Union[str, Path], dest: Union[str, Path]) -> None:
         """Convert an ActionScript file to JavaScript.

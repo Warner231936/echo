@@ -121,3 +121,31 @@ def test_const_and_semicolonless_trace():
     ).strip()
 
     assert js == expected
+
+
+def test_package_and_import_removal():
+    src_code = textwrap.dedent(
+        """
+        package {
+            import flash.utils.Dictionary;
+            var count:int = 0;
+            function inc(val:int):void {
+                trace(val);
+            }
+        }
+        """
+    ).strip()
+
+    converter = FlashConverter()
+    js = converter.convert_code(src_code)
+
+    expected = textwrap.dedent(
+        """
+        let count = 0;
+        function inc(val) {
+            console.log(val);
+        }
+        """
+    ).strip()
+
+    assert js == expected

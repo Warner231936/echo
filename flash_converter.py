@@ -40,25 +40,29 @@ class FlashConverter:
 
         js = action_script
 
-        # Replace trace() calls with console.log()
-        js = re.sub(r"trace\((.*?)\);", r"console.log(\1);", js)
+        # Replace trace() calls with console.log(), preserving semicolons if present
+        js = re.sub(r"trace\((.*?)\)(;?)", r"console.log(\1)\2", js)
 
         # Replace 'var' with 'let'
         js = re.sub(r"\bvar\b", "let", js)
 
-        # Remove type annotations from variable declarations
-        js = re.sub(r"\blet\s+([A-Za-z_][\w]*)\s*:\s*[A-Za-z_][\w]*", r"let \1", js)
-
-        # Remove type annotations within parameter lists (e.g. "(x:int, y:String)")
+        # Remove type annotations from variable declarations (let/const) including generics
         js = re.sub(
-            r"(\(|,)\s*([A-Za-z_][\w]*)\s*:\s*[A-Za-z_][\w]*(\s*=\s*[^,\)]+)?",
-            lambda m: f"{m.group(1)}{m.group(2)}{m.group(3) or ''}",
+            r"\b(let|const)\s+([A-Za-z_][\w]*)\s*:\s*([A-Za-z_][\w\.]*(?:<[^>]+>)?)",
+            lambda m: f"{m.group(1)} {m.group(2)}",
             js,
         )
 
-        # Remove return type annotations in function declarations.
+        # Remove type annotations within parameter lists (e.g. "(x:int, y:String)")
         js = re.sub(
-            r"(function\s+[a-zA-Z_][\w]*\s*\([^)]*\))\s*:\s*[A-Za-z_][\w]*",
+            r"(\(|,)\s*([A-Za-z_][\w]*)\s*:\s*([A-Za-z_][\w\.]*(?:<[^>]+>)?)(\s*=\s*[^,\)]+)?",
+            lambda m: f"{m.group(1)}{m.group(2)}{m.group(4) or ''}",
+            js,
+        )
+
+        # Remove return type annotations in function declarations (supports modifiers)
+        js = re.sub(
+            r"((?:\b(?:public|private|protected|internal|static)\s+)*function\s+[a-zA-Z_][\w]*\s*\([^)]*\))\s*:\s*([A-Za-z_][\w\.]*(?:<[^>]+>)?)",
             r"\1",
             js,
         )

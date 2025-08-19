@@ -96,3 +96,28 @@ def test_object_literals_and_defaults():
     ).strip()
 
     assert js == expected
+
+
+def test_const_and_semicolonless_trace():
+    src_code = textwrap.dedent(
+        """
+        const PI:Number = 3.14;
+        function show(items:Vector.<String>):void {
+            trace(items[0])
+        }
+        """
+    ).strip()
+
+    converter = FlashConverter()
+    js = converter.convert_code(src_code)
+
+    expected = textwrap.dedent(
+        """
+        const PI = 3.14;
+        function show(items) {
+            console.log(items[0])
+        }
+        """
+    ).strip()
+
+    assert js == expected

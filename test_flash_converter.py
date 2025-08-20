@@ -195,3 +195,100 @@ def test_package_and_import_removal():
     ).strip()
 
     assert js == expected
+
+
+def test_access_modifiers_removed():
+    src_code = textwrap.dedent(
+        """
+        public var score:int = 0;
+        private const PI:Number = 3.14;
+        protected function inc(val:int):void {
+            trace(val);
+        }
+        static function count():int {
+            return 0;
+        }
+        """
+    ).strip()
+
+    converter = FlashConverter()
+    js = converter.convert_code(src_code)
+
+    expected = textwrap.dedent(
+        """
+        let score = 0;
+        const PI = 3.14;
+        function inc(val) {
+            console.log(val);
+        }
+        function count() {
+            return 0;
+        }
+        """
+    ).strip()
+
+    assert js == expected
+
+
+def test_for_each_loop_conversion():
+    src_code = textwrap.dedent(
+        """
+        var items:Array = [1, 2, 3];
+        for each (var item in items) {
+            trace(item);
+        }
+        """
+    ).strip()
+
+    converter = FlashConverter()
+    js = converter.convert_code(src_code)
+
+    expected = textwrap.dedent(
+        """
+        let items = [1, 2, 3];
+        for (let item of items) {
+            console.log(item);
+        }
+        """
+    ).strip()
+
+    assert js == expected
+
+
+def test_class_implements_removed():
+    src_code = textwrap.dedent(
+        """
+        public class MySprite extends Sprite implements IFoo, IBar {
+            public function MySprite() {
+                trace('hi');
+            }
+        }
+
+        internal class Simple implements IThing {
+            public function Simple() {
+                trace('x');
+            }
+        }
+        """
+    ).strip()
+
+    converter = FlashConverter()
+    js = converter.convert_code(src_code)
+
+    expected = textwrap.dedent(
+        """
+        class MySprite extends Sprite {
+            function MySprite() {
+                console.log('hi');
+            }
+        }
+
+        class Simple {
+            function Simple() {
+                console.log('x');
+            }
+        }
+        """
+    ).strip()
+
+    assert js == expected

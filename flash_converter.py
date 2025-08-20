@@ -22,6 +22,8 @@ class FlashConverter:
     * ``trace(...)`` calls become ``console.log(...)``.
     * ``var`` declarations are replaced with ``let`` and the ActionScript type
       annotations are removed.
+    * Access modifiers such as ``public`` or ``private`` are stripped.
+    * ``implements`` clauses in class declarations are removed.
     * Function return type annotations are stripped.
     """
 
@@ -48,6 +50,7 @@ class FlashConverter:
 
         # Remove import statements entirely
         js = re.sub(r"^\s*import [^\n]+(?:\n|$)", "", js, flags=re.MULTILINE)
+
 
         # Replace ``trace`` calls with ``console.log``.
         #
@@ -83,6 +86,13 @@ class FlashConverter:
         js = re.sub(
             r"(\(|,)\s*([A-Za-z_][\w]*)\s*:\s*([A-Za-z_][\w\.]*(?:<[^>]+>)?)(\s*=\s*[^,\)]+)?",
             lambda m: f"{m.group(1)}{m.group(2)}{m.group(4) or ''}",
+            js,
+        )
+
+        # Convert ActionScript 'for each' loops to JavaScript 'for...of' loops
+        js = re.sub(
+            r"\bfor\s+each\s*\(\s*(let|const)\s+([A-Za-z_][\w]*)\s+in\s+([^\)]+)\)",
+            r"for (\1 \2 of \3)",
             js,
         )
 

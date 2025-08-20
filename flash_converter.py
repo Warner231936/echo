@@ -51,25 +51,6 @@ class FlashConverter:
         # Remove import statements entirely
         js = re.sub(r"^\s*import [^\n]+(?:\n|$)", "", js, flags=re.MULTILINE)
 
-        # Remove access modifiers like ``public`` or ``private`` which have no
-        # equivalent in JavaScript. ActionScript often prefixes variable or
-        # function declarations with these keywords (and ``static``), resulting
-        # in invalid JavaScript if left untouched. We simply strip any such
-        # modifiers regardless of order.
-        js = re.sub(
-            r"\b(?:public|private|protected|internal|static)\s+",
-            "",
-            js,
-        )
-
-        # Remove ``implements`` clauses from class declarations. JavaScript
-        # classes do not support interfaces, so ``implements`` portions are
-        # simply discarded while preserving any ``extends`` base classes.
-        js = re.sub(
-            r"(class\s+[A-Za-z_][\w]*(?:\s+extends\s+[A-Za-z_][\w]*(?:<[^>]+>)?)?)\s+implements\s+[^{]*?\S(\s*\{)",
-            r"\1\2",
-            js,
-        )
 
         # Replace ``trace`` calls with ``console.log``.
         #

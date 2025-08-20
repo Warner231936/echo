@@ -22,6 +22,8 @@ class FlashConverter:
     * ``trace(...)`` calls become ``console.log(...)``.
     * ``var`` declarations are replaced with ``let`` and the ActionScript type
       annotations are removed.
+    * Access modifiers such as ``public`` or ``private`` are stripped.
+    * ``implements`` clauses in class declarations are removed.
     * Function return type annotations are stripped.
     """
 
@@ -49,8 +51,45 @@ class FlashConverter:
         # Remove import statements entirely
         js = re.sub(r"^\s*import [^\n]+(?:\n|$)", "", js, flags=re.MULTILINE)
 
-        # Replace trace() calls with console.log(), preserving semicolons if present
-        js = re.sub(r"trace\((.*?)\)(;?)", r"console.log(\1)\2", js)
+        # Remove access modifiers like ``public`` or ``private`` which have no
+        # equivalent in JavaScript. ActionScript often prefixes variable or
+        # function declarations with these keywords (and ``static``), resulting
+        # in invalid JavaScript if left untouched. We simply strip any such
+        # modifiers regardless of order.
+        js = re.sub(
+            r"\b(?:public|private|protected|internal|static)\s+",
+            "",
+            js,
+        )
+
+        # Remove ``implements`` clauses from class declarations. JavaScript
+        # classes do not support interfaces, so ``implements`` portions are
+        # simply discarded while preserving any ``extends`` base classes.
+        js = re.sub(
+            r"(class\s+[A-Za-z_][\w]*(?:\s+extends\s+[A-Za-z_][\w]*(?:<[^>]+>)?)?)\s+implements\s+[^{]*?\S(\s*\{)",
+            r"\1\2",
+            js,
+        )
+
+        # Replace ``trace`` calls with ``console.log``.
+        #
+        # ActionScript allows whitespace between ``trace`` and its argument list
+        # (``trace ("hi")``). The original implementation didn't handle this
+        # form which meant such statements were left untouched. The updated
+        # pattern below accepts optional spaces after ``trace`` and before an
+        # optional semicolon. We deliberately avoid matching newlines so that
+        # the structure of the surrounding code remains intact when no semicolon
+        # is present.
+        #
+        # ``trace`` can also appear as part of a longer identifier (``mytrace``)
+        # or as a method on an object (``logger.trace``). Those occurrences
+        # should not be replaced, so we require ``trace`` to be a standalone
+        # identifier that is not preceded by a dot.
+        js = re.sub(
+            r"(?<!\.)\btrace\b\s*\((.*?)\)[ \t]*(;?)",
+            r"console.log(\1)\2",
+            js,
+        )
 
         # Replace 'var' with 'let'
         js = re.sub(r"\bvar\b", "let", js)
@@ -66,6 +105,13 @@ class FlashConverter:
         js = re.sub(
             r"(\(|,)\s*([A-Za-z_][\w]*)\s*:\s*([A-Za-z_][\w\.]*(?:<[^>]+>)?)(\s*=\s*[^,\)]+)?",
             lambda m: f"{m.group(1)}{m.group(2)}{m.group(4) or ''}",
+            js,
+        )
+
+        # Convert ActionScript 'for each' loops to JavaScript 'for...of' loops
+        js = re.sub(
+            r"\bfor\s+each\s*\(\s*(let|const)\s+([A-Za-z_][\w]*)\s+in\s+([^\)]+)\)",
+            r"for (\1 \2 of \3)",
             js,
         )
 
